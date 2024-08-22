@@ -1,0 +1,101 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+@font-face {
+    font-family: "gost";
+    src: url("../fonds/gost.TTF");
+}
+
+.content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.content-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 30px;
+}
+
+.current-data {
+    width: 45%;
+    font-family: "gost";
+    font-size: 24px;
+    line-height: 1.5;
+}
+
+.top-cell2-photo {
+    background-image: url('../media/cell1.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 717px;
+    width: 45%;
+}
+
+#graf {
+    width: 100%;
+    max-width: 1200px;
+    height: 500px;
+}
+
+.current-data-h3 {
+    margin: 20px 0;
+    padding: 0;
+    font-size: 32px;
+    font-family: "gost";
+    text-align: center;
+}
+
+/* Обновленные стили для кнопок и списков событий */
+.button-row {
+    display: flex;
+    gap: 400px;  /* Увеличено расстояние между кнопками */
+    margin-bottom: 20px;
+    margin-top: 50px;
+    justify-content: center;
+}
+
+.event-button {
+    padding: 15px 30px; /* Увеличен размер кнопок */
+    font-size: 40px; /* Увеличен шрифт кнопок */
+    font-family: "gost";
+    cursor: pointer;
+    background-color: #f0f0f0;
+    transition: background-color 0.3s ease;
+    border: none; /* Убрана обводка */
+}
+
+.event-button:hover {
+    background-color: #e0e0e0;
+}
+
+.event-list {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.event-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.event-list li {
+    padding: 10px 0; /* Убран border и добавлен отступ снизу */
+    font-family: "gost";
+    font-size: 30px;
+}

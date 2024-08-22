@@ -1,0 +1,47 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%; /* Делаем высоту body и html 100% */
+}
+
+.content {
+    display: flex;
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center;     /* Центрирование по вертикали */
+    height: 100vh;           /* Высота на всю высоту окна браузера */
+    width: 100%;
+}
+
+.content-manager {
+    display: flex;
+    justify-content: center; /* Центрирование по горизонтали */
+    align-items: center;
+    background-color: black;
+    height: 90vh;
+    width: 90vw;
+    gap: 171px;
+}
+.cell-1, .cell-2 {
+    background-repeat: no-repeat;
+    background-size: cover;    /* Полностью заполняем блок изображением */
+    background-position: center; /* Центрируем изображение внутри блока */
+    width: 63vh;
+    height: 69vh;
+    transition: all .6s;
+}
+
+/* Указываем фоновые изображения для каждого блока */
+.cell-1 {
+    background-image: url('../media/cell1.jpg');
+}
+
+.cell-2 {
+    background-image: url('../media/cell2.jpg');
+}
+
+/* Ховер-эффект */
+.cell-1:hover, .cell-2:hover {
+    transform: scale(1.2);
+    border-radius: 3%;
+
+}

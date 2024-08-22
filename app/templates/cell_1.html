@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', path='ico/logo.ico') }}" type="image/x-icon">
+    <link href="{{ url_for('static', path='css/cell1.css') }}" rel="stylesheet">
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-base.min.js"></script>
+    <title>Ячейка 1</title>
+</head>
+<body>
+    <div class="content">
+        <h3 class="current-data-h3">
+            Актуальные данные по установке
+        </h3>
+        <div class="content-top">
+            <div class="current-data">
+                <p>Проволока: {{ wire }} от {{ wire_time }}</p>
+                <p>Газ основной: {{ main_gaz }} от {{ main_gaz_time }}</p>
+                <p>Доп газ: {{ add_gaz }} от  {{ add_gaz_time }}</p>
+                <p>Наконечник: {{ tip }} {{ tip_type }} от {{ tip_time }}</p>
+                <p>Ролики: {{ roll }} {{ roll_type }} {{ roll_dim }}</p>
+                <p>Деффузор: {{ mudguard }} от {{ mudguard_time }}</p>
+                <p>Брызговик: {{ thread }} от {{ thread_time }}</p>
+                <p>Сопло: {{ nozzle }} от {{ nozzle_time }}</p>
+            </div>
+            <div class="top-cell2-photo"></div>
+        </div>
+       <div class="button-row">
+            <button id="standard-btn" class="event-button" onclick="scrollToEvents('standard-events')">Штатные события</button>
+            <button id="nonstandard-btn" class="event-button" onclick="scrollToEvents('nonstandard-events')">Нештатные события</button>
+       </div>
+       <div id="events-section" class="event-list">
+            <div id="standard-events">
+                    <ul>
+                        {% for event in standatr_event %}
+                            <li>
+                                {{ event.datarime.strftime('%Y-%m-%d %H:%M') }}
+                                {{ event.user.name }} {{ event.user.surname }}
+                                {{ event.message }} {{ event.user_message }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+            </div>
+            <div id="nonstandard-events" style="display:none;">
+                <ul>
+                    {% for event in not_standart_event %}
+                            <li>
+                                {{ event.datarime.strftime('%Y-%m-%d %H:%M') }}
+                                {{ event.user.name }}
+                                {{ event.user.surname }}
+                                {{ event.message }}
+                                {{ event.user_message }}
+                            </li>
+                    {% endfor %}
+                </ul>
+            </div>
+       </div>
+
+        <script type="text/javascript">
+        function scrollToEvents(eventId) {
+            // Скрываем все секции событий
+            document.getElementById('standard-events').style.display = 'none';
+            document.getElementById('nonstandard-events').style.display = 'none';
+
+            // Показываем выбранную секцию
+            document.getElementById(eventId).style.display = 'block';
+
+            // Плавно прокручиваем страницу к секции событий
+            document.getElementById('events-section').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+    </div>
+</body>
+</html>
