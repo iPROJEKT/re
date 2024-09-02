@@ -296,12 +296,12 @@ async def process_gas_message(message: Message, state: FSMContext, gas_type: str
     data = await state.get_data()
     gas_id = data['gas_id']
     user_id = data['user_id']
+    user = await get_user_by_id(user_id)
     item_name = await get_gaz_name(gas_id)
     async with AsyncSessionLocal() as session:
-        user = await get_user_by_id(user_id)
         await update_gaz(user, gas_id, gas_type)
         additional_data = {"message": f"Замена {gas_type.lower()} газа на ID {item_name}", "user_message": user_message}
-        await create_event(session, user_id, EventType.SETTING, additional_data, robot_id=user.number_robot)
+        await create_event(session, user.id, EventType.SETTING, additional_data, robot_id=user.number_robot)
         await message.answer(f"{gas_type} газ обновлен и событие записано.")
     await state.clear()
 

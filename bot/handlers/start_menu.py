@@ -145,7 +145,7 @@ async def user_get_robot(message: Message) -> None:
     print(user_is_admin)
     if user_is_admin:
         await message.answer(
-            'http://192.168.20.180:8080/admin/login\n'
+            'http://192.168.20.152:8080/admin/login\n'
             'И помни! Большая база - большой дроп'
             'Большая сила - большая ответственность'
         )
@@ -158,5 +158,5 @@ async def user_get_robot(message: Message) -> None:
 @router.message(F.text == 'Сайт с состояниями')
 async def web_site(m: Message):
     await m.answer(
-        'http://192.168.20.180:8080/'
+        'http://192.168.20.152:8080/'
     )

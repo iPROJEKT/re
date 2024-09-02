@@ -19,15 +19,13 @@ async def hello_world(request: Request):
 async def cell_1_page(request: Request):
     current_data = await get_robot(number=1)
     sandart_event = await standart_event(number=1)
-    s = sandart_event[:10]
     no_standart_event = await not_standart_event(number=1)
-    n = no_standart_event[:10]
     return templates.TemplateResponse(
         request=request,
         name="cell_1.html",
         context={
-            'standatr_event': s,
-            'not_standart_event': n,
+            'standatr_event': sandart_event,
+            'not_standart_event': no_standart_event,
             'wire': current_data.robot_wire.wire_mark,
             'wire_time': current_data.robot_last_update_wire.strftime('%Y-%m-%d %H:%M'),
             'main_gaz': current_data.robot_gaz.gaz_name,
@@ -54,15 +52,13 @@ async def cell_1_page(request: Request):
 async def cell_2_page(request: Request):
     current_data = await get_robot(number=2)
     sandart_event = await standart_event(number=2)
-    s = sandart_event[:10]
     no_standart_event = await not_standart_event(number=2)
-    n = no_standart_event[:10]
     return templates.TemplateResponse(
         request=request,
         name="cell_2.html",
         context={
-            'standatr_event': s,
-            'not_standart_event': n,
+            'standatr_event': sandart_event,
+            'not_standart_event': no_standart_event,
             'wire': current_data.robot_wire.wire_mark,
             'wire_time': current_data.robot_last_update_wire.strftime('%Y-%m-%d %H:%M'),
             'main_gaz': current_data.robot_gaz.gaz_name,
