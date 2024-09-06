@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', path='ico/logo.ico') }}" type="image/x-icon">
+    <link href="{{ url_for('static', path='css/all.css') }}" rel="stylesheet">
+    <!-- Подключение AnyChart и темной темы -->
+    <script src="https://cdn.anychart.com/releases/v8/themes/dark_earth.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
+    <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
+    <!-- Тех.включения  -->
+    <script type="text/javascript">
+        var dataSet = anychart.data.set([
+            ['Проволока',{{ wire_data_int }}, {{ wire_data }}],
+            ['Наконечник', {{ tip_data }}],
+            ['Дефекты', {{ defff }}],
+        ]);
+    </script>
+    <script type="text/javascript">
+        function getData() {
+            return [
+                ['1986', 3.6, 2.3, 2.8, 11.5],
+        ] ;}
+    </script>
+    <!-- Мой js скриптики  -->
+    <script src="{{ url_for('static', path='js/schedule.js') }}"></script>
+    <script src="{{ url_for('static', path='js/gas_flow_analysis.js') }}"></script>
+    <script src="{{ url_for('static', path='js/smooth.js') }}"></script>
+    <title>{{ page_title }}</title>
+</head>
+<body>
+    <div class="content">
+        <h3 class="current-data-h3">
+            Актуальные данные по установке
+        </h3>
+        <div class="content-top">
+            <div class="current-data">
+                <p>Проволока: {{ wire }} от {{ wire_time }}</p>
+                <p>Газ основной: {{ main_gaz }} от {{ main_gaz_time }}</p>
+                <p>Доп газ: {{ add_gaz }} от  {{ add_gaz_time }}</p>
+                <p>Наконечник: {{ tip }} {{ tip_type }} от {{ tip_time }}</p>
+                <p>Ролики: {{ roll }} {{ roll_type }} {{ roll_dim }}</p>
+                <p>Деффузор: {{ mudguard }} от {{ mudguard_time }}</p>
+                <p>Брызговик: {{ thread }} от {{ thread_time }}</p>
+                <p>Сопло: {{ nozzle }} от {{ nozzle_time }}</p>
+            </div>
+            <div class="top-cell{{ cell_number }}-photo"></div>
+        </div>
+        <div id="graf" class="graf-all"></div>
+        <div id="container"></div>
+        <div class="button-row">
+            <button id="standard-btn" class="event-button" onclick="scrollToEvents('standard-events')">
+                Штатные события
+            </button>
+            <button id="nonstandard-btn" class="event-button" onclick="scrollToEvents('nonstandard-events')">
+                Нештатные события
+            </button>
+        </div>
+        <div id="events-section" class="event-list">
+            <div id="standard-events">
+                <ul>
+                    {% for event in standatr_event %}
+                        <li>
+                            {{ event.datarime.strftime('%Y-%m-%d %H:%M') }}
+                            {{ event.user.name }} {{ event.user.surname }}
+                            {{ event.message }} {{ event.user_message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="nonstandard-events" style="display:none;">
+                <ul>
+                    {% for event in not_standart_event %}
+                        <li>
+                            {{ event.datarime.strftime('%Y-%m-%d %H:%M') }}
+                            {{ event.user.name }} {{ event.user.surname }}
+                            {{ event.message }} {{ event.user_message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

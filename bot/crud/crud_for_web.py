@@ -1,6 +1,7 @@
 from typing import Optional, List, Union, Type
 
-from sqlalchemy import or_
+from sqlalchemy import or_, func
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
@@ -36,8 +37,9 @@ async def standart_event(number):
         query = select(Event).join(Robot, Event.robot_id == Robot.id).options(
             selectinload(Event.user)
         ).where(
-            (Robot.robot_number == number) & or_(Event.event_type == 'SETTING', Event.event_type == 'CLEANING')
-        )
+            (Robot.robot_number == number) &
+            or_(Event.event_type == 'SETTING', Event.event_type == 'CLEANING')
+        ).order_by(Event.datarime.desc())
         result = await session.execute(query)
         events = result.scalars().all()
     return events
@@ -49,8 +51,42 @@ async def not_standart_event(number):
             selectinload(Event.user)
         ).where(
             (Robot.robot_number == number) & (Event.event_type == 'DEFECT')
-        )
+        ).order_by(Event.datarime.desc())
         result = await session.execute(query)
         events = result.scalars().all()
     return events
 
+
+async def change_wire(number):
+    async with AsyncSessionLocal() as session:
+        query = select(func.count()).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'SETTING') &
+            (Event.message.like('Замена проволоки%'))
+        )
+        result = await session.execute(query)
+        count = result.scalar()
+    return count
+
+
+async def change_tip_c(number):
+    async with AsyncSessionLocal() as session:
+        query = select(func.count()).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'SETTING') &
+            (Event.message.like('Замена наконечника%'))
+        )
+        result = await session.execute(query)
+        count = result.scalar()
+    return count
+
+
+async def def_cou(number):
+    async with AsyncSessionLocal() as session:
+        query = select(func.count()).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'DEFECT')
+        )
+        result = await session.execute(query)
+        count = result.scalar()
+    return count

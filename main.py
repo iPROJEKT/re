@@ -27,10 +27,10 @@ templates = Jinja2Templates(directory="app/templates")
 async def start_fastapi():
     import uvicorn
     from app.admin.admin import admin
-    from app.veiws.index import router
+    from app.veiws.routers import main_router
     app.mount("/admin", admin)
-    app.include_router(router)
-    config = uvicorn.Config(app, host="0.0.0.0", port=8080, log_level="info", reload=True)
+    app.include_router(main_router)
+    config = uvicorn.Config(app, host="127.0.0.1", port=8080, log_level="info", reload=True)
     server = uvicorn.Server(config)
     await server.serve()
 

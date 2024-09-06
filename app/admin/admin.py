@@ -56,6 +56,8 @@ def get_admin():
 
     class WireAdmin(ModelView, model=Wire):
         column_list = [Wire.wire_mark, Wire.wire_diameter]
+        column_details_exclude_list = ['wire.robots']
+        page_size = 50
 
     class GazAdmin(ModelView, model=Gaz):
         column_list = [Gaz.gaz_name, Gaz.gaz_type_obj]
