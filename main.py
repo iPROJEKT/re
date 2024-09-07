@@ -30,7 +30,7 @@ async def start_fastapi():
     from app.veiws.index import router
     app.mount("/admin", admin)
     app.include_router(router)
-    config = uvicorn.Config(app, host="0.0.0.0", port=8080, log_level="info", reload=True)
+    config = uvicorn.Config(app, host="192.168.20.184", port=8080, log_level="info", reload=True)
     server = uvicorn.Server(config)
     await server.serve()
 

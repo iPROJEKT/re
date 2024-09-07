@@ -40,31 +40,25 @@ async def robot_state_menu(message: Message) -> None:
             'Комплектация\n'
             '\n'
             f'Проволока: {robot.robot_wire.wire_mark} {robot.robot_wire.wire_diameter}\n'
-            f'Последняя замена проволоки: {robot.robot_last_update_wire.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Последняя замена проволоки: {robot.robot_last_update_wire.strftime("%Y-%m-%d %H:%M")}\n'
             f'Газ основной: {robot.robot_gaz.gaz_name} {robot.robot_gaz.gaz_type_obj}\n'
-            f'Последняя замена основного газа: {robot.robot_last_update_gaz.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Последняя замена основного газа: {robot.robot_last_update_gaz.strftime("%Y-%m-%d %H:%M")}\n'
             f'Газ дополнительный: {robot.robot_add_gaz.gaz_name} {robot.robot_add_gaz.gaz_type_obj}\n'
-            f'Последняя замена доп газа: {robot.robot_last_update_add_gaz.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Последняя замена доп газа: {robot.robot_last_update_add_gaz.strftime("%Y-%m-%d %H:%M")}\n'
             f'Наконечник: {robot.robot_tip.tip_diameter} {robot.robot_tip.tip_type}\n'
-            f'Последняя замена наконечника: {robot.robot_last_update_tip.strftime('%Y-%m-%d %H:%M')}\n'
-            f'Ролики: {
-                robot.robot_rolls.rolls_color
-            } {
-                robot.robot_rolls.rolls_cutout_type
-            } {
-                robot.robot_rolls.rolls_ware_dim
-            }\n'
+            f'Последняя замена наконечника: {robot.robot_last_update_tip.strftime("%Y-%m-%d %H:%M")}\n'
+            f'Ролики: {robot.robot_rolls.rolls_color} {robot.robot_rolls.rolls_cutout_type} { robot.robot_rolls.rolls_ware_dim}\n'
             f'Деффузор: {robot.robot_mudguard.mudguard_material}\n'
-            f'Последняя замена деффузора: {robot.robot_last_update_diffuser.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Последняя замена деффузора: {robot.robot_last_update_diffuser.strftime("%Y-%m-%d %H:%M")}\n'
             f'Брызговик: {robot.robot_diffuser.diffuser_thread}\n'
-            f'Последняя замена брызговика: {robot.robot_last_update_mudguard.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Последняя замена брызговика: {robot.robot_last_update_mudguard.strftime("%Y-%m-%d %H:%M")}\n'
             f'Сопло: {robot.robot_nozzle.nozzle_form}\n'
-            f'Последняя замена сопла: {robot.robot_last_update_nozzle.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Последняя замена сопла: {robot.robot_last_update_nozzle.strftime("%Y-%m-%d %H:%M")}\n'
             '\n'
             'ОЧИСТКИ\n'
             '\n'
-            f'Очистка основного сопла: {robot.robot_clear_nozzle.strftime('%Y-%m-%d %H:%M')}\n'
-            f'Очистка доп сопла:{robot.robot_clear_add_nozzle.strftime('%Y-%m-%d %H:%M')}\n'
-            f'Очистка каналов:{robot.robot_clear_intestine.strftime('%Y-%m-%d %H:%M')}\n'
+            f'Очистка основного сопла: {robot.robot_clear_nozzle.strftime("%Y-%m-%d %H:%M")}\n'
+            f'Очистка доп сопла:{robot.robot_clear_add_nozzle.strftime("%Y-%m-%d %H:%M")}\n'
+            f'Очистка каналов:{robot.robot_clear_intestine.strftime("%Y-%m-%d %H:%M")}\n'
 
         )
