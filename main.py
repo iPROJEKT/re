@@ -29,6 +29,7 @@ async def start_fastapi():
     from app.admin.admin import admin
     from app.veiws.routers import main_router
     app.mount("/admin", admin)
+<<<<<<< HEAD
     app.include_router(main_router)
     from fastapi.middleware.cors import CORSMiddleware
     app.add_middleware(
@@ -39,6 +40,10 @@ async def start_fastapi():
         allow_headers=["*"],
     )
     config = uvicorn.Config(app, host="127.0.0.1", port=8080, log_level="info", reload=True)
+=======
+    app.include_router(router)
+    config = uvicorn.Config(app, host="192.168.20.184", port=8080, log_level="info", reload=True)
+>>>>>>> 19a916ff0e962c02ce8c90fec5862c382a78688d
     server = uvicorn.Server(config)
     await server.serve()
 

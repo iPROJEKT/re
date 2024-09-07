@@ -47,7 +47,11 @@ async def robot_state_menu(message: Message) -> None:
             f'Последняя замена доп газа: {robot.robot_last_update_add_gaz.strftime("%Y-%m-%d %H:%M")}\n'
             f'Наконечник: {robot.robot_tip.tip_diameter} {robot.robot_tip.tip_type}\n'
             f'Последняя замена наконечника: {robot.robot_last_update_tip.strftime("%Y-%m-%d %H:%M")}\n'
+<<<<<<< HEAD
             f'Ролики: {robot.robot_rolls.rolls_color} {robot.robot_rolls.rolls_cutout_type} {robot.robot_rolls.rolls_ware_dim}\n'
+=======
+            f'Ролики: {robot.robot_rolls.rolls_color} {robot.robot_rolls.rolls_cutout_type} { robot.robot_rolls.rolls_ware_dim}\n'
+>>>>>>> 19a916ff0e962c02ce8c90fec5862c382a78688d
             f'Деффузор: {robot.robot_mudguard.mudguard_material}\n'
             f'Последняя замена деффузора: {robot.robot_last_update_diffuser.strftime("%Y-%m-%d %H:%M")}\n'
             f'Брызговик: {robot.robot_diffuser.diffuser_thread}\n'
