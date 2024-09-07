@@ -1,101 +1,101 @@
-    anychart.onDocumentReady(function () {
-      // create data set on our data
-      var dataSet = anychart.data.set(getData());
+var chart;
+var plot;
+var tipSeries;
+var wareSeries;
+var gazSeries;
+var rollsSeries;
+var intestineSeries;
+var diffuserSeries;
+var mudguardSeries;
+var nozzleSeries;
+var socket = new WebSocket("ws://localhost:8080/ws/tip-data/" + cell_number);
 
-      // map data for the first series, take x from the zero column and value from the first column of data set
-      var firstSeriesData = dataSet.mapAs({ x: 0, value: 1 });
+socket.onopen = function() {
+    console.log("WebSocket connection established");
+};
 
-      // map data for the second series, take x from the zero column and value from the second column of data set
-      var secondSeriesData = dataSet.mapAs({ x: 0, value: 2 });
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+}
 
-      // map data for the third series, take x from the zero column and value from the third column of data set
-      var thirdSeriesData = dataSet.mapAs({ x: 0, value: 3 });
+// Функция для обновления графика
+function updateChart(data) {
 
+    // Функция для обработки данных и форматирования даты
+    function processData(data) {
+        return data.map(item => [new Date(item[0]).getTime(), item[1]]);
+    }
 
-      var fourSeriesData = dataSet.mapAs({ x: 0, value: 4 });
+    function sortDataByDate(data) {
+        return data.sort((a, b) => a[0] - b[0]);
+    }
 
-      // create line chart
-      var chart = anychart.line();
+    // Обрабатываем и сортируем данные для каждой серии
+    var processedTipData = sortDataByDate(processData(data.tip_data));
+    var processedWareData = sortDataByDate(processData(data.ware_data));
+    var processedGazData = sortDataByDate(processData(data.gaz_data));
+    var processedRollsData = sortDataByDate(processData(data.rolls_data));
+    var processedIntestineData = sortDataByDate(processData(data.intestine_data));
+    var processedDiffuserData = sortDataByDate(processData(data.diffuser_data));
+    var processedMudguardData = sortDataByDate(processData(data.mudguard_data));
+    var processedNozzleData = sortDataByDate(processData(data.nozzle_data));
 
-      // turn on chart animation
-      chart.animation(true);
+    if (!chart) {
+        anychart.onDocumentReady(function() {
+            anychart.theme('darkGlamour');
+            chart = anychart.stock(); // Используем anychart.stock для создания графика
+            plot = chart.plot(0);
 
-      // set chart padding
-      chart.padding([10, 20, 5, 20]);
+            // Настраиваем оси и легенду
+            plot.xAxis().labels().format('dd-MM-yyyy');
+            plot.xAxis().labels().padding(5);
+            plot.yAxis().title('Количество замен');
 
-      // turn on the crosshair
-      chart.crosshair().enabled(true).yLabel(false).yStroke(null);
+            plot.legend().enabled(true).fontSize(13).padding([0, 0, 10, 0]);
 
-      // set tooltip mode to point
-      chart.tooltip().positionMode('point');
+            // Создаем серии и добавляем их на график
+            tipSeries = plot.line(processedTipData).name('Замены наконечников');
+            wareSeries = plot.line(processedWareData).name('Замены проволоки');
+            gazSeries = plot.line(processedGazData).name('Замены газа');
+            rollsSeries = plot.line(processedRollsData).name('Замены роликов');
+            intestineSeries = plot.line(processedIntestineData).name('Замены кишечника');
+            diffuserSeries = plot.line(processedDiffuserData).name('Замены диффузора');
+            mudguardSeries = plot.line(processedMudguardData).name('Замены брызговика');
+            nozzleSeries = plot.line(processedNozzleData).name('Замены сопла');
 
-      // set chart title text settings
-      chart.title(
-        'Расход газа'
-      );
+            chart.container('container');
+            chart.draw();
+        });
+    } else {
+        // Обновляем данные существующих серий
+        if (tipSeries) tipSeries.data(processedTipData);
+        if (wareSeries) wareSeries.data(processedWareData);
+        if (gazSeries) gazSeries.data(processedGazData);
+        if (rollsSeries) rollsSeries.data(processedRollsData);
+        if (intestineSeries) intestineSeries.data(processedIntestineData);
+        if (diffuserSeries) diffuserSeries.data(processedDiffuserData);
+        if (mudguardSeries) mudguardSeries.data(processedMudguardData);
+        if (nozzleSeries) nozzleSeries.data(processedNozzleData);
+    }
+}
 
-      // set yAxis title
-      chart.yAxis().title('Литры');
-      chart.xAxis().labels().padding(5);
+socket.onmessage = function(event) {
+    var data = JSON.parse(event.data);
+    updateChart(data);
+};
 
-      // create first series with mapped data
-      var firstSeries = chart.line(firstSeriesData);
-      firstSeries.name('Ar 100%');
-      firstSeries.hovered().markers().enabled(true).type('circle').size(4);
-      firstSeries
-        .tooltip()
-        .position('right')
-        .anchor('left-center')
-        .offsetX(5)
-        .offsetY(5);
+socket.onerror = function(error) {
+    console.error("WebSocket error:", error);
+};
 
-      // create second series with mapped data
-      var secondSeries = chart.line(secondSeriesData);
-      secondSeries.name('Ar 98% CO2 2%');
-      secondSeries.hovered().markers().enabled(true).type('circle').size(4);
-      secondSeries
-        .tooltip()
-        .position('right')
-        .anchor('left-center')
-        .offsetX(5)
-        .offsetY(5);
-
-      // create third series with mapped data
-      var thirdSeries = chart.line(thirdSeriesData);
-      thirdSeries.name('Ar 80% CO2 20%');
-      thirdSeries.hovered().markers().enabled(true).type('circle').size(4);
-      thirdSeries
-        .tooltip()
-        .position('right')
-        .anchor('left-center')
-        .offsetX(5)
-        .offsetY(5);
-
-      var thirdSeries = chart.line(fourSeriesData);
-      thirdSeries.name('He 100%');
-      thirdSeries.hovered().markers().enabled(true).type('circle').size(4);
-      thirdSeries
-        .tooltip()
-        .position('right')
-        .anchor('left-center')
-        .offsetX(5)
-        .offsetY(5);
-
-      var thirdSeries = chart.line(thirdSeriesData);
-      thirdSeries.name('CO2 100%');
-      thirdSeries.hovered().markers().enabled(true).type('circle').size(4);
-      thirdSeries
-        .tooltip()
-        .position('right')
-        .anchor('left-center')
-        .offsetX(5)
-        .offsetY(5);
-
-      // turn the legend on
-      chart.legend().enabled(true).fontSize(13).padding([0, 0, 10, 0]);
-
-      // set container id for the chart
-      chart.container('container');
-      // initiate chart drawing
-      chart.draw();
-    });
+socket.onclose = function(event) {
+    if (event.wasClean) {
+        console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+    } else {
+        console.error(`Connection died`);
+    }
+};

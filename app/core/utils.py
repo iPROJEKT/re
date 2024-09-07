@@ -1,23 +1,25 @@
+import json
 from typing import Dict, Any
 
-from bot.crud.crud_for_web import get_robot, standart_event, not_standart_event, change_wire, change_tip_c, def_cou
+from bot.crud.crud_for_web import get_robot, standart_event, not_standart_event
 
 
-async def get_common_context(number: int) -> Dict[str, Any]:
-    current_data = await get_robot(number)
+async def get_common_event(number: int) -> Dict[str, Any]:
     sandart_event = await standart_event(number)
     no_standart_event = await not_standart_event(number)
 
-    wire_data = await change_wire(number) * 16
-    wire_data_int = await change_wire(number)
-    tip_data = await change_tip_c(number)
-    defect = await def_cou(number)
-
     context = {
-        'defff': defect,
         'cell_number': str(number),
         'standatr_event': sandart_event,
         'not_standart_event': no_standart_event,
+    }
+    return context
+
+
+async def get_common_contex(number: int) -> Dict[str, Any]:
+    current_data = await get_robot(number)
+    context = {
+        'cell_number': str(number),
         'wire': current_data.robot_wire.wire_mark,
         'wire_time': current_data.robot_last_update_wire.strftime('%Y-%m-%d %H:%M'),
         'main_gaz': current_data.robot_gaz.gaz_name,
@@ -36,8 +38,5 @@ async def get_common_context(number: int) -> Dict[str, Any]:
         'thread_time': current_data.robot_last_update_mudguard.strftime('%Y-%m-%d %H:%M'),
         'nozzle': current_data.robot_nozzle.nozzle_form,
         'nozzle_time': current_data.robot_last_update_nozzle.strftime('%Y-%m-%d %H:%M'),
-        'wire_data': wire_data,
-        'tip_data': tip_data,
-        'wire_data_int': wire_data_int
     }
     return context

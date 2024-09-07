@@ -1,15 +1,10 @@
-from typing import Optional, List, Union, Type
-
 from sqlalchemy import or_, func
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
-from bot.core.utils import moscow_now
 from bot.models.base import AsyncSessionLocal
-from bot.models.defect_model import EventType, Event
-from bot.models.models import Robot, MOSCOW_TZ, Gaz, UserWAAMer, Tip, Wire, Nozzle, Diffuser, Mudguard, Intestine, Rolls
+from bot.models.defect_model import Event
+from bot.models.models import Robot
 
 
 async def get_robot(number):
@@ -57,30 +52,6 @@ async def not_standart_event(number):
     return events
 
 
-async def change_wire(number):
-    async with AsyncSessionLocal() as session:
-        query = select(func.count()).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
-            (Robot.robot_number == number) &
-            (Event.event_type == 'SETTING') &
-            (Event.message.like('Замена проволоки%'))
-        )
-        result = await session.execute(query)
-        count = result.scalar()
-    return count
-
-
-async def change_tip_c(number):
-    async with AsyncSessionLocal() as session:
-        query = select(func.count()).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
-            (Robot.robot_number == number) &
-            (Event.event_type == 'SETTING') &
-            (Event.message.like('Замена наконечника%'))
-        )
-        result = await session.execute(query)
-        count = result.scalar()
-    return count
-
-
 async def def_cou(number):
     async with AsyncSessionLocal() as session:
         query = select(func.count()).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
@@ -90,3 +61,101 @@ async def def_cou(number):
         result = await session.execute(query)
         count = result.scalar()
     return count
+
+
+async def change_gaz(number: int):
+    async with AsyncSessionLocal() as session:
+        query = select(
+            func.date(Event.datarime).label('date'),
+            func.count().label('count')
+        ).select_from(Event).join(
+            Robot, Event.robot_id == Robot.id
+        ).where(
+            (Robot.robot_number == number) &
+            (
+                Event.message.like('Замена основной газа на%') |
+                Event.message.like('Замена креобака на%') |
+                Event.message.like('Замена дополнительный газа на%')
+            ) &
+            (Event.event_type == 'SETTING')
+        ).group_by(
+            func.date(Event.datarime)
+        )
+
+        result = await session.execute(query)
+        changes_by_day = result.all()
+    return changes_by_day
+
+
+async def change_rolls(number):
+    async with AsyncSessionLocal() as session:
+        query = select(
+            func.date(Event.datarime),
+            func.count()
+        ).select_from(Event).join(
+            Robot, Event.robot_id == Robot.id
+        ).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'SETTING') &
+            (Event.message.like('Замена роликов на %'))
+        ).group_by(
+            func.date(Event.datarime)
+        )
+        result = await session.execute(query)
+        changes_by_day = result.all()
+    return changes_by_day
+
+
+async def change_intestine(number):
+    async with AsyncSessionLocal() as session:
+        query = select(
+            func.date(Event.datarime),
+            func.count()
+        ).select_from(Event).join(
+            Robot, Event.robot_id == Robot.id
+        ).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'SETTING') &
+            (Event.message.like('Замена направляющего канала на%'))
+        ).group_by(
+            func.date(Event.datarime)
+        )
+        result = await session.execute(query)
+        changes_by_day = result.all()
+    return changes_by_day
+
+
+async def change_wire(number):
+    async with AsyncSessionLocal() as session:
+        query = select(
+            func.date(Event.datarime),
+            func.count()
+        ).select_from(Event).join(Robot, Event.robot_id == Robot.id).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'SETTING') &
+            (Event.message.like('Замена проволоки%'))
+        ).group_by(
+            func.date(Event.datarime)
+        )
+        result = await session.execute(query)
+        changes_by_day = result.all()
+    return changes_by_day
+
+
+async def get_changes_by_day(number: int, message_like: str):
+    async with AsyncSessionLocal() as session:
+        query = select(
+            func.date(Event.datarime),
+            func.count()
+        ).select_from(Event).join(
+            Robot, Event.robot_id == Robot.id
+        ).where(
+            (Robot.robot_number == number) &
+            (Event.event_type == 'SETTING') &
+            (Event.message.like(message_like))
+        ).group_by(
+            func.date(Event.datarime)
+        )
+        result = await session.execute(query)
+        changes_by_day = result.all()
+    return changes_by_day

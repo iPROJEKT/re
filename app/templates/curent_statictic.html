@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Разделенная страница</title>
+    <link href="{{ url_for('static', path='css/table.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static', path='js/table-socked.js') }}"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+             <div class="top-section">
+                <div class="left-side">
+                    <p><strong>Установка 1</strong></p>
+                    <p><strong>Время:</strong> <span id="current-time-left">Loading...</span></p>
+                    <p><strong>Смена:</strong></p>
+                    <p><strong>Ответственный за смену:</strong></p>
+                    <p><strong>УП:</strong></p>
+                    <p><strong>РКД:</strong></p>
+                    <p><strong>Марка проволоки:</strong> <span id="current-wire-mark-left">Loading...</span></p>
+                    <p><strong>Диаметр:</strong> <span id="current-wire-diameter-left">Loading...</span></p>
+                </div>
+                <div class="separator"></div>
+                <div class="right-side">
+                    <p><strong>Установка 2</strong></p>
+                    <p><strong>Время:</strong> <span id="current-time-right">Loading...</span></p>
+                    <p><strong>Смена:</strong></p>
+                    <p><strong>Ответственный за смену:</strong></p>
+                    <p><strong>УП:</strong></p>
+                    <p><strong>РКД:</strong></p>
+                    <p><strong>Марка проволоки:</strong> <span id="current-wire-mark-right">Loading...</span></p>
+                    <p><strong>Диаметр:</strong> <span id="current-wire-diameter-right">Loading...</span></p>
+                </div>
+            </div>
+            <div class="bottom-section">
+                <p>Задачи на день</p>
+                <ul>
+                    <li>f</li>
+                    <li>f</li>
+                    <li>f</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

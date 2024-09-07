@@ -1,0 +1,24 @@
+        <div id="events-section" class="event-list">
+            <div id="standard-events">
+                <ul>
+                    {% for event in standatr_event %}
+                        <li>
+                            {{ event.datarime.strftime('%Y-%m-%d %H:%M') }}
+                            {{ event.user.name }} {{ event.user.surname }}
+                            {{ event.message }} {{ event.user_message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div id="nonstandard-events" style="display:none;">
+                <ul>
+                    {% for event in not_standart_event %}
+                        <li>
+                            {{ event.datarime.strftime('%Y-%m-%d %H:%M') }}
+                            {{ event.user.name }} {{ event.user.surname }}
+                            {{ event.message }} {{ event.user_message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
