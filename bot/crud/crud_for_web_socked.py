@@ -1,7 +1,10 @@
+from sqlalchemy import func
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from bot.models.base import AsyncSessionLocal
+from bot.models.defect_model import Event
 from bot.models.models import Robot
 
 
@@ -24,3 +27,57 @@ async def get_robot_web_socket(numbers: list[int]):
                 }
 
     return contexts
+
+
+async def get_wire_replacements_by_mark(number):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(
+                func.date(Event.datarime).label('replacement_date'),  # Дата замены (без времени)
+                Event.message,  # Сообщение с описанием замены
+                func.count(Event.id).label('replacement_count')  # Количество замен
+            ).join(
+                Robot, Event.robot_id == Robot.id
+            ).where(
+                (Robot.robot_number == number) &
+                Event.message.like('Замена проволоки на %')
+            )  # Фильтруем только замены проволоки
+            .group_by(func.date(Event.datarime), Event.message)  # Группируем по дате и марке проволоки
+            .order_by(func.date(Event.datarime).asc())  # Сортируем по дате замены
+        )
+        replacements = result.fetchall()
+        return [
+            {
+                "replacement_date": row[0],
+                "wire_mark": row[1].replace('Замена проволоки на ', ''),  # Извлекаем марку проволоки
+                "replacement_count": row[2]
+            }
+            for row in replacements
+        ]
+
+
+async def get_tip_replacements_by_mark(number):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(
+                func.date(Event.datarime).label('replacement_date'),  # Дата замены (без времени)
+                Event.message,  # Сообщение с описанием замены
+                func.count(Event.id).label('replacement_count')  # Количество замен
+            ).join(
+                Robot, Event.robot_id == Robot.id
+            ).where(
+                (Robot.robot_number == number) &
+                Event.message.like('Замена наконечника на %')
+            )  # Фильтруем только замены наконечников
+            .group_by(func.date(Event.datarime), Event.message)  # Группируем по дате и марке наконечника
+            .order_by(func.date(Event.datarime).asc())  # Сортируем по дате замены
+        )
+        replacements = result.fetchall()
+        return [
+            {
+                "replacement_date": row[0],
+                "tip_mark": row[1].replace('Замена наконечника на ', ''),  # Извлекаем марку наконечника
+                "replacement_count": row[2]
+            }
+            for row in replacements
+        ]

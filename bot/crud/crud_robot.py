@@ -248,7 +248,7 @@ async def get_gaz_name(item_id):
 
 async def get_tip_name(item_id):
     async with AsyncSessionLocal() as session:
-        query = select(Tip.tip_type).where(Tip.id == item_id)
+        query = select(Tip.tip_diameter).where(Tip.id == item_id)
         result = await session.execute(query)
         return result.scalar_one_or_none()
 

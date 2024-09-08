@@ -55,8 +55,6 @@ html, body {
 /* Обновленные стили для кнопок и списков событий */
 .button-row {
     display: flex;
-    margin-bottom: 20px;
-    margin-top: 50px;
     justify-content: center;
 }
 
@@ -137,6 +135,28 @@ html, body {
 #container{
     max-width: 1200px;
     width: 100%;
-    height: 400px;
-    box-sizing: border-box
+    height: 500px; /* Увеличьте высоту */
+    box-sizing: border-box;
+    margin-bottom: 20px; /* Добавьте отступ между графиками */
+}
+.dia{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+#wire-schedule{
+    max-width: 1200px;
+    width: 100%;
+    height: 500px; /* Увеличьте высоту */
+    box-sizing: border-box;
+    margin-bottom: 20px; /* Добавьте отступ между графиками */
+}
+#tip-schedule{
+    max-width: 1200px;
+    width: 100%;
+    height: 500px; /* Увеличьте высоту */
+    box-sizing: border-box;
+    margin-bottom: 20px; /* Добавьте отступ между графиками */
 }

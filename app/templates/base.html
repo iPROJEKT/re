@@ -15,9 +15,11 @@
     <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
     <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
     <script> var cell_number = {{ cell_number | int }}; </script>
-    <script src="{{ url_for('static', path='js/gas_flow_analysis.js') }}"></script>
+    <script src="{{ url_for('static', path='js/all-graf.js') }}"></script>
     <script src="{{ url_for('static', path='js/smooth.js') }}"></script>
     <script src="{{ url_for('static', path='js/robot-socked.js') }}"></script>
+    <script src="{{ url_for('static', path='js/wire_schedule.js') }}"></script>
+    <script src="{{ url_for('static', path='js/tip_schedule.js') }}"></script>
     <title>{{ page_title }}</title>
 </head>
 <body>
@@ -38,7 +40,11 @@
             </div>
             <div class="top-cell{{ cell_number }}-photo"></div>
         </div>
-        <div id="container"></div>
+        <div class="dia">
+            <div id="container"></div>
+            <div id="wire-schedule"></div>
+            <div id="tip-schedule"></div>
+        </div>
         <div class="button-row">
             <button id="standard-btn" class="event-button" onclick="scrollToEvents('standard-events')">
                 Штатные события

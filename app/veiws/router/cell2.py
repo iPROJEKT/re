@@ -31,7 +31,7 @@ async def websocket_robot_2(websocket: WebSocket):
     while True:
         try:
             # Получаем актуальные данные о состоянии робота
-            context = await get_common_contex(1)
+            context = await get_common_contex(2)
 
             # Преобразуем данные в JSON формат
             data_json = json.dumps(context)
@@ -46,14 +46,14 @@ async def websocket_robot_2(websocket: WebSocket):
             break
 
 
-@router.websocket("/ws/tip-data/2")
+@router.websocket("/ws/all-data/2")
 async def websocket_endpoint_2(websocket: WebSocket):
     await websocket.accept()
     while True:
         try:
             ware_data = await get_changes_by_day(2, 'Замена проволоки%')
             tip_data = await get_changes_by_day(2, 'Замена наконечника%')
-            gaz_data = await change_gaz(1)
+            gaz_data = await change_gaz(2)
             rolls_data = await get_changes_by_day(2, 'Замена роликов на%')
             intestine_data = await get_changes_by_day(2, 'Замена направляющего канала на%')
             diffuser_data = await get_changes_by_day(2, 'Замена диффузора на%')

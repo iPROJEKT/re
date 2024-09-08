@@ -5,7 +5,6 @@ socket.onopen = function() {
 };
 socket.onmessage = function(event) {
     var data = JSON.parse(event.data);
-    console.log('Data received:', data);
     document.getElementById('wire').textContent = data.wire || '-';
     document.getElementById('wire_time').textContent = data.wire_time || '-';
 

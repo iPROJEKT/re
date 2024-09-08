@@ -28,16 +28,20 @@ async def get_robot(number):
 
 
 async def standart_event(number):
-    async with AsyncSessionLocal() as session:
-        query = select(Event).join(Robot, Event.robot_id == Robot.id).options(
-            selectinload(Event.user)
-        ).where(
-            (Robot.robot_number == number) &
-            or_(Event.event_type == 'SETTING', Event.event_type == 'CLEANING')
-        ).order_by(Event.datarime.desc())
-        result = await session.execute(query)
-        events = result.scalars().all()
-    return events
+    try:
+        async with AsyncSessionLocal() as session:
+            query = select(Event).join(Robot, Event.robot_id == Robot.id).options(
+                selectinload(Event.user)
+            ).where(
+                (Robot.robot_number == number) &
+                or_(Event.event_type == 'SETTING', Event.event_type == 'CLEANING')
+            ).order_by(Event.datarime.desc())
+            result = await session.execute(query)
+            events = result.scalars().all()
+        return events
+    except Exception as e:
+        print(f"Error executing query: {e}")
+        raise
 
 
 async def not_standart_event(number):
