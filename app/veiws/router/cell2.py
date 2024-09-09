@@ -85,3 +85,50 @@ async def websocket_endpoint_2(websocket: WebSocket):
         except Exception as e:
             print(f"Error: {e}")
             break
+
+
+@router.websocket("/ws/all-wire-data/2")
+async def websocket_endpoint_wire(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        try:
+            wire_brands = [
+                'Св-08Г2С-О', 'Св-АМг6', 'Св-04Х19Н9', 'Св-06х19н9т',
+                'Св-12х13', 'Св-08Г2С ультра', 'Св-Г2СНТ-О', 'Ultra 700',
+                'Ultra 500', '30ХГСА', 'Св-01Х23Н28М3Д3', 'Св-08ЧГСМФА-О',
+                'Св-08Г2С-Br'
+            ]
+
+            wire_data = {}
+
+            for brand in wire_brands:
+                data = await get_changes_by_day(2, f'Замена проволоки на {brand}%')
+                wire_data_by_day = [(row.date, row.count) for row in data]
+                wire_data[brand] = wire_data_by_day
+
+            data_json = json.dumps(wire_data)
+            await websocket.send_text(data_json)
+            await asyncio.sleep(5)
+        except Exception as e:
+            print(f"Error: {e}")
+            break
+
+
+@router.websocket("/ws/all-tip-data/2")
+async def websocket_endpoint_tip(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        try:
+            tip_diameters = ['0.8', '1.0', '1.2', '1.6']
+            tip_data = {}
+            for diameter in tip_diameters:
+                data = await get_changes_by_day(2, f'Замена наконечника на {diameter}%')
+                tip_data_by_day = [(row.date, row.count) for row in data]
+                tip_data[diameter] = tip_data_by_day
+
+            data_json = json.dumps(tip_data)
+            await websocket.send_text(data_json)
+            await asyncio.sleep(5)
+        except Exception as e:
+            print(f"Error: {e}")
+            break
