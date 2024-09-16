@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from bot.models.base import AsyncSessionLocal
-from bot.models.models import UserWAAMer
+from bot.models.models import UserWAAMer, Table
 
 
 async def create_user(
@@ -71,6 +71,16 @@ async def is_admin(telegram_id: int) -> bool:
         return result.scalar_one_or_none()
 
 
+async def is_collector(telegram_id: int) -> bool:
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(UserWAAMer.is_collector).where(
+                UserWAAMer.telegram_user_id == telegram_id
+            )
+        )
+        return result.scalar_one_or_none()
+
+
 async def cell_for_user(
     user: UserWAAMer,
     cell_number: int
@@ -88,3 +98,10 @@ async def cell_for_user(
         user.number_robot = cell_number
         session.add(user)
         await session.commit()
+
+
+async def get_last_rb():
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Table).order_by(Table.id.desc()).limit(1))
+        last_record = result.scalars().first()  # Получаем последнюю запись
+        return last_record

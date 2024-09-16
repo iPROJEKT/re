@@ -160,3 +160,17 @@ html, body {
     box-sizing: border-box;
     margin-bottom: 20px; /* Добавьте отступ между графиками */
 }
+#gas-schedule{
+    max-width: 1200px;
+    width: 100%;
+    height: 500px; /* Увеличьте высоту */
+    box-sizing: border-box;
+    margin-bottom: 20px; /* Добавьте отступ между графиками */
+}
+#defect-schedule{
+    max-width: 1200px;
+    width: 100%;
+    height: 500px; /* Увеличьте высоту */
+    box-sizing: border-box;
+    margin-bottom: 20px; /* Добавьте отступ между графиками */
+}

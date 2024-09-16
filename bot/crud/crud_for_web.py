@@ -91,7 +91,7 @@ async def change_gaz(number: int):
     return changes_by_day
 
 
-async def get_changes_by_day(number: int, message_like: str):
+async def get_changes_by_day(number: int, message_like: str, event_type: str):
     async with AsyncSessionLocal() as session:
         query = select(
             func.date(Event.datarime),
@@ -100,7 +100,7 @@ async def get_changes_by_day(number: int, message_like: str):
             Robot, Event.robot_id == Robot.id
         ).where(
             (Robot.robot_number == number) &
-            (Event.event_type == 'SETTING') &
+            (Event.event_type == event_type) &
             (Event.message.like(message_like))
         ).group_by(
             func.date(Event.datarime)

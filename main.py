@@ -1,11 +1,15 @@
 import os
 import asyncio
 import logging
+
+import uvicorn
 from aiogram import Bot, Dispatcher
 from aiogram.utils.token import TokenValidationError
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi import Request
+from starlette.responses import HTMLResponse
 
 from app.core.core import app
 from bot.core.const import LOG_FORM, LOG_FILEMOD, LOG_FILENAME
@@ -25,11 +29,9 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 async def start_fastapi():
-    import uvicorn
     from app.admin.admin import admin
     from app.veiws.routers import main_router
     app.mount("/admin", admin)
-    app.include_router(main_router)
     config = uvicorn.Config(app, host="127.0.0.1", port=8080, log_level="info", reload=True)
     app.include_router(main_router)
     server = uvicorn.Server(config)
@@ -54,7 +56,7 @@ async def start_bot():
 
 
 async def main():
-    await asyncio.gather(start_bot(), start_fastapi())
+    await asyncio.gather(start_fastapi(), start_bot())
 
 if __name__ == '__main__':
     logging.basicConfig(

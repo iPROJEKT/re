@@ -1,13 +1,19 @@
+import logging
 import random
 from pathlib import Path
 
+from aiogram.fsm.context import FSMContext
 from aiogram import Router, F, types
 from aiogram.filters import CommandStart
 from aiogram.types import KeyboardButton, Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from bot.core.const import START_MESSAGE_NOT_ALLOWED, START_MESSAGE, LIST_ANSWER
+from bot.crud.crud_robot import get_all_user_name, get_brands_by_type, get_unique_types, update_consumable_count
 from bot.crud.crud_user import get_user_by_id, is_admin
+from bot.core.state import ShiftSupervisor, ConsumableStates
+from bot.models.base import AsyncSessionLocal
+from bot.models.models import Table
 
 router = Router()
 
@@ -17,7 +23,9 @@ router = Router()
 @router.message(CommandStart())
 async def command_start(
         message: Message,
+        state: FSMContext
 ) -> None:
+    await state.clear()
     """
     Handles messages for session termination or starting a new session.
 
@@ -33,24 +41,42 @@ async def command_start(
     - Register
     - Check robot status
     """
-    builder_1 = ReplyKeyboardBuilder()
-    builder = ReplyKeyboardBuilder()
-    builder_1.row(KeyboardButton(text='Зарегистрироваться'))
-    builder_1.row(KeyboardButton(text='Узнать состояние роботов'))
-    builder.row(KeyboardButton(text='Выбор установки'))
-    builder.row(KeyboardButton(text='Узнать состояние роботов'))
-    builder.row(KeyboardButton(text='Администрирование Красносельского района'))
-    builder.row(KeyboardButton(text='Сайт с состояниями'))
+    # Клавиатура для незарегистрированного пользователя
+    unregistered_builder = ReplyKeyboardBuilder()
+    unregistered_builder.row(KeyboardButton(text='Зарегистрироваться'))
+    unregistered_builder.row(KeyboardButton(text='Узнать состояние роботов'))
 
-    if await get_user_by_id(message.from_user.id):
+    # Клавиатура для зарегистрированного пользователя
+    user_builder = ReplyKeyboardBuilder()
+    user_builder.row(KeyboardButton(text='Узнать состояние роботов'))
+    user_builder.row(KeyboardButton(text='Выбор установки'))
+    user_builder.row(KeyboardButton(text='Узнать состояние роботов'))
+
+    # Клавиатура для администратора
+    admin_builder = ReplyKeyboardBuilder()
+    admin_builder.row(KeyboardButton(text='Узнать состояние роботов'))
+    admin_builder.row(KeyboardButton(text='Выбор установки'))
+    admin_builder.row(KeyboardButton(text='Администрирование'))
+    admin_builder.row(KeyboardButton(text='Сайт с состояниями'))
+    admin_builder.row(KeyboardButton(text='Добавление расходников'))
+
+    # Проверка на администратора
+    if await is_admin(message.from_user.id):
         await message.answer(
             START_MESSAGE,
-            reply_markup=builder.as_markup(resize_keyboard=True),
+            reply_markup=admin_builder.as_markup(resize_keyboard=True),
         )
+    # Проверка на зарегистрированного пользователя
+    elif await get_user_by_id(message.from_user.id):
+        await message.answer(
+            START_MESSAGE,
+            reply_markup=user_builder.as_markup(resize_keyboard=True),
+        )
+    # Если пользователь не зарегистрирован
     else:
         await message.answer(
             START_MESSAGE_NOT_ALLOWED,
-            reply_markup=builder_1.as_markup(resize_keyboard=True),
+            reply_markup=unregistered_builder.as_markup(resize_keyboard=True),
         )
 
 
@@ -129,7 +155,7 @@ async def user_get_robot(message: Message) -> None:
     )
 
 
-@router.message(F.text == 'Администрирование Красносельского района')
+@router.message(F.text == 'Администрирование')
 async def user_get_robot(message: Message) -> None:
     """
     Presents the user with a choice of robot cells based on their admin status.
@@ -156,7 +182,143 @@ async def user_get_robot(message: Message) -> None:
 
 
 @router.message(F.text == 'Сайт с состояниями')
-async def web_site(m: Message):
-    await m.answer(
+async def web_site(message: Message):
+    await message.answer(
         'http://192.168.20.184:8080/'
     )
+
+
+@router.message(F.text == 'Начальник смены')
+async def shift_supervisor(message: Message, state: FSMContext):
+    all_user = await get_all_user_name()
+    builder = ReplyKeyboardBuilder()
+    for user in all_user:
+        builder.row(KeyboardButton(text=f'{user.name} {user.surname}'))
+    await state.set_state(ShiftSupervisor.shift_supervisor)
+    await message.answer(
+        'Выбери своего Равшана',
+        reply_markup=builder.as_markup(resize_keyboard=True),
+    )
+
+
+@router.message(ShiftSupervisor.shift_supervisor)
+async def state_shift_supervisor(message: Message, state: FSMContext):
+    await state.update_data(shift_supervisor=message.text)
+    data = await state.get_data()
+
+    # Допустим, данные сохраняются в таблицу смены
+    shift_supervisor_name = data.get('shift_supervisor')
+
+    # Добавление данных в базу через SQLAlchemy
+    new_record = Table(shift_responsible=shift_supervisor_name)
+
+    async with AsyncSessionLocal() as session:  # Используем асинхронную сессию
+        async with session.begin():
+            session.add(new_record)  # Добавляем запись
+        await session.commit()  # Сохраняем изменения
+
+    await message.answer(f'Начальник смены {shift_supervisor_name} успешно выбран.')
+    await state.clear()
+    await command_start(message)
+
+
+@router.message(F.text == 'Добавление расходников')
+async def add_consumable(message: Message, state: FSMContext):
+    """
+    Старт диалога добавления расходников.
+    Пользователь выбирает тип расходника.
+    """
+    component_types = await get_unique_types()
+
+    builder = ReplyKeyboardBuilder()
+    for component_type in component_types:
+        builder.row(KeyboardButton(text=component_type))
+    builder.row(KeyboardButton(text="В стартовое меню"))
+
+    await message.answer("Выберите тип расходника:", reply_markup=builder.as_markup(resize_keyboard=True))
+    await state.set_state(ConsumableStates.choose_type)
+
+
+@router.message(ConsumableStates.choose_type)
+async def choose_brand(message: Message, state: FSMContext):
+    """
+    Пользователь выбирает марку расходника в зависимости от типа.
+    """
+    component_type = message.text
+    await state.update_data(consumable_type=component_type)
+
+    brands = await get_brands_by_type(component_type)
+    builder = ReplyKeyboardBuilder()
+    builder.row(KeyboardButton(text="В стартовое меню"))
+    if brands:
+        for brand, sub in brands:
+            builder.row(KeyboardButton(text=f"{brand} {sub}"))
+
+        await message.answer(
+            f"Вы выбрали {component_type}. Теперь выберите марку:",
+            reply_markup=builder.as_markup(
+                resize_keyboard=True
+            )
+        )
+        await state.set_state(ConsumableStates.choose_brand)
+    else:
+        await message.answer("Неверный выбор. Пожалуйста, выберите тип расходника.")
+        await state.set_state(ConsumableStates.choose_type)
+
+
+@router.message(ConsumableStates.choose_brand)
+async def update_quantity(message: Message, state: FSMContext):
+    """
+    Пользователь вводит новое количество для выбранного расходника.
+    """
+    logging.info(f"Current state: {await state.get_state()}")  # Логирование состояния
+    data = await state.get_data()
+    component_type = data['consumable_type']
+
+    selected_brand = message.text
+    # Ограничиваем split только двумя частями
+    mark, sub = selected_brand.split(maxsplit=1)
+
+    await state.update_data(selected_brand=selected_brand)
+    await message.answer(
+        f"Вы выбрали {selected_brand}. Введите новое количество:",
+        reply_markup=types.ReplyKeyboardRemove()
+    )
+    await state.set_state(ConsumableStates.update_quantity)
+
+
+@router.message(ConsumableStates.update_quantity)
+async def process_quantity_update(message: Message, state: FSMContext):
+    """
+    Обработка нового количества и обновление записи в базе данных.
+    После этого переходим на выбор типа расходника (хендлер add_consumable).
+    """
+    new_quantity = message.text
+
+    if new_quantity.isdigit():
+        new_quantity = int(new_quantity)
+        data = await state.get_data()
+        component_type = data['consumable_type']
+        mark, sub = data['selected_brand'].split(maxsplit=1)
+
+        # Обновляем количество в базе данных
+        updated_item = await update_consumable_count(component_type, mark, sub, new_quantity)
+
+        if updated_item:
+            await message.answer(
+                f"Количество для {mark} {sub} обновлено до {new_quantity}.",
+                reply_markup=types.ReplyKeyboardRemove()  # Убираем клавиатуру
+            )
+        else:
+            await message.answer(
+                f"Ошибка при обновлении количества для {mark} {sub}.",
+                reply_markup=types.ReplyKeyboardRemove()  # Убираем клавиатуру в случае ошибки
+            )
+        await state.clear()  # Очищаем состояние после обновления
+
+        # После обновления возвращаем пользователя к выбору типа расходника
+        await add_consumable(message, state)
+
+    else:
+        await message.answer("Пожалуйста, введите корректное число.")
+        await state.set_state(ConsumableStates.update_quantity)

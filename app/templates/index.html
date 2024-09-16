@@ -5,14 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', path='ico/logo.ico') }}" type="image/x-icon">
     <link href="{{ url_for('static', path='css/styles.css') }}" rel="stylesheet">
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-ui.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/js/anychart-exports.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/v8/themes/dark_earth.min.js"></script>
+    <link href="https://cdn.anychart.com/releases/v8/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+    <link href="https://cdn.anychart.com/releases/v8/fonts/css/anychart-font.min.css" type="text/css" rel="stylesheet">
     <title>Trinititech</title>
 </head>
 <body>
     <div class="content">
         <div class="content-manager">
-            <a href="{{ url_for('cell_1_page') }}" class="cell-1"></a>
-            <a href="{{ url_for('cell_2_page') }}" class="cell-2"></a>
+            <a href="{{ url_for('cell_page', cell_id=1) }}" class="cell-1"></a>
+            <a href="{{ url_for('cell_page', cell_id=2) }}" class="cell-2"></a>
+        </div>
+        <div class="filter-container">
+            <label for="component-type">Выберите тип компонента:</label>
+            <select id="component-type">
+                <option value="проволока">Проволока</option>
+                <option value="наконечник">Наконечник</option>
+                <option value="газ">Газ</option>
+            </select>
+        </div>
+        <div class="dia" id="dia-container">
+            <!-- Графики будут добавляться сюда динамически -->
         </div>
     </div>
+<script src="{{ url_for('static', path='js/pie-graf.js') }}"></script>
 </body>
 </html>

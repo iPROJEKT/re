@@ -25,6 +25,7 @@ class UserWAAMer(Base):
     name = Column(String, unique=False, nullable=False, doc='Имя')
     surname = Column(String, unique=False, nullable=True, doc='Фамилия')
     number_robot = Column(Integer, unique=False, nullable=False, default=0, doc='Номер установки')
+    is_collector = Column(Boolean, default=False, doc='Опероуполномоченый')
     is_admin = Column(Boolean, default=False, doc='Опероуполномоченый')
     change = relationship('Change')
 
@@ -40,6 +41,7 @@ class Wire(Base):
     wire_mark = Column(String, nullable=False, doc='Марка проволоки')
     wire_diameter = Column(Float, nullable=False, doc='Диаметр проволоки')
     robots = relationship('Robot', back_populates='robot_wire')
+    controls = relationship('Control', back_populates='wire')
 
 
 class Gaz(Base):
@@ -53,6 +55,7 @@ class Gaz(Base):
     gaz_name = Column(String, nullable=True, doc='Марка газа')
     gaz_type_obj = Column(String, nullable=True, doc='Балон/Креобак')
     robots = relationship('Robot', back_populates='robot_gaz', foreign_keys='Robot.robot_gaz_id')
+    controls = relationship('Control', back_populates='gaz')
 
 
 class Tip(Base):
@@ -66,6 +69,7 @@ class Tip(Base):
     tip_diameter = Column(Float, nullable=False, doc='Диаметр наконечника')
     tip_type = Column(String, nullable=False, doc='Cu / Cu-Cr-Zr')
     robots = relationship('Robot', back_populates='robot_tip')
+    controls = relationship('Control', back_populates='tip')
 
 
 class Rolls(Base):
@@ -208,3 +212,37 @@ class Change(Base):
     changes_model_id = Column(Integer, doc='На что поменял ID')
     changes_time = Column(DateTime, default=moscow_now(MOSCOW_TZ), doc='Во сколько поменял')
     changes_robot = Column(Integer, doc='Робот')
+
+
+class Table(Base):
+    shift_responsible = Column(String, doc='Ответственный за смену')
+    number_shift = Column(Integer, nullable=True, doc='Номер смены')
+
+
+class Control(Base):
+    """Model describing the control data for various components (газ/наконечник/проволока).
+
+    Attributes:
+    - type (str): Тип компонента (газ/наконечник/проволока).
+    - mark (str): Марка газа, наконечника или проволоки.
+    - sub (str): Спецификация (баллон/диаметр/диаметр наконечника).
+    - count (int): Количество замененных элементов.
+    """
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String, nullable=False, doc="Тип компонента: газ/наконечник/проволока")
+    mark = Column(String, nullable=False, doc="Марка газа/наконечника/проволоки")
+    sub = Column(String, nullable=False, doc="Спецификация: баллон/диаметр проволоки/диаметр наконечника")
+    count = Column(Integer, nullable=False, default=0, doc="Количество замен")
+    start_count = Column(Integer, nullable=True, default=0, doc="Количество замен")
+
+    # Связь с моделью Wire
+    wire_id = Column(Integer, ForeignKey('wire.id'))
+    wire = relationship('Wire', back_populates='controls')
+
+    # Связь с моделью Gaz
+    gaz_id = Column(Integer, ForeignKey('gaz.id'))
+    gaz = relationship('Gaz', back_populates='controls')
+
+    # Связь с моделью Tip
+    tip_id = Column(Integer, ForeignKey('tip.id'))
+    tip = relationship('Tip', back_populates='controls')

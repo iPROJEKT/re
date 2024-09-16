@@ -6,9 +6,10 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
 from bot.core.utils import moscow_now
-from bot.models.base import AsyncSessionLocal
+from bot.models.base import AsyncSessionLocal, Base
 from bot.models.defect_model import EventType, Event
-from bot.models.models import Robot, MOSCOW_TZ, Gaz, UserWAAMer, Tip, Wire, Nozzle, Diffuser, Mudguard, Intestine, Rolls
+from bot.models.models import Robot, MOSCOW_TZ, Gaz, UserWAAMer, Tip, Wire, Nozzle, Diffuser, Mudguard, Intestine, \
+    Rolls, Control
 
 
 async def get_multi_robot() -> list[Robot]:
@@ -218,6 +219,13 @@ async def update_robot_component(
                 session.add(robot)
 
 
+async def get_item_by_id(model: Base, item_id):
+    async with AsyncSessionLocal() as session:
+        query = select(model).where(model.id == item_id)
+        result = await session.execute(query)
+    return result.scalar_one_or_none()
+
+
 async def get_all_diameter(model):
     async with AsyncSessionLocal() as session:
         query = select(distinct(model.wire_diameter))
@@ -255,7 +263,7 @@ async def get_tip_name(item_id):
 
 async def get_rolls_name(item_id):
     async with AsyncSessionLocal() as session:
-        query = select(Rolls.rolls_cutout_type).where(Rolls.id == item_id)
+        query = select(Rolls.rolls_color).where(Rolls.id == item_id)
         result = await session.execute(query)
         return result.scalar_one_or_none()
 
@@ -269,7 +277,7 @@ async def get_intestine_name(item_id):
 
 async def get_diffuser_name(item_id):
     async with AsyncSessionLocal() as session:
-        query = select(Diffuser.diffuser_thread).where(Diffuser.id == item_id)
+        query = select(Diffuser).where(Diffuser.id == item_id)
         result = await session.execute(query)
         return result.scalar_one_or_none()
 
@@ -286,3 +294,73 @@ async def get_nozzle_name(item_id):
         query = select(Nozzle.nozzle_form).where(Nozzle.id == item_id)
         result = await session.execute(query)
         return result.scalar_one_or_none()
+
+
+async def get_all_user_name():
+    async with AsyncSessionLocal() as session:
+        query = select(UserWAAMer)
+        result = await session.execute(query)
+    return result.scalars().all()
+
+
+async def get_unique_types():
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Control.type).distinct())
+        return [row[0] for row in result]
+
+
+async def get_brands_by_type(component_type: str):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(
+                Control.mark,
+                Control.sub
+            ).filter(
+                Control.type == component_type
+            )
+        )
+        return result.fetchall()
+
+
+async def update_consumable_count(component_type: str, mark: str, sub: str, new_count: int):
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(
+            select(Control).filter(
+                Control.type == component_type,
+                Control.mark == mark,
+                Control.sub == sub
+            )
+        )
+        consumable = result.scalar_one_or_none()
+        if consumable:
+            consumable.count = new_count
+            consumable.start_count = new_count
+            await session.commit()
+        return consumable
+
+
+async def decrement_item_quantity(mark: int, sub: Base):
+    """
+    Decrease the quantity of an item in the database.
+
+    Args:
+        mark: (str): The ID of the item to update.
+        quantity_field (str): The field name representing the quantity.
+
+    Returns:
+        None
+    """
+    async with AsyncSessionLocal() as session:
+        query = select(Control).where(
+            Control.mark == mark,
+            Control.sub == sub
+        )
+        result = await session.execute(query)
+        consumable = result.scalar_one_or_none()
+
+        if consumable:
+            if consumable.count > 0:
+                consumable.count -= 1
+                await session.commit()
+            else:
+                return 'Кончилось'

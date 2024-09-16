@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from bot.models.base import AsyncSessionLocal
 from bot.models.defect_model import Event
-from bot.models.models import Robot
+from bot.models.models import Robot, Control
 
 
 async def get_robot_web_socket(numbers: list[int]):
@@ -81,3 +81,32 @@ async def get_tip_replacements_by_mark(number):
             }
             for row in replacements
         ]
+
+
+async def get_control_data(session: AsyncSession, component_type: str):
+    """
+    Функция для получения данных из таблицы Control по типу компонента (газ, наконечник, проволока).
+
+    Args:
+        session (AsyncSession): Асинхронная сессия SQLAlchemy.
+        component_type (str): Тип компонента (газ/наконечник/проволока).
+
+    Returns:
+        List[Dict]: Список данных в формате [{"name": ..., "count": ..., "start_count": ...}]
+    """
+    # Создаем SQL-запрос для получения данных из таблицы Control
+    query = select(Control).where(Control.type == component_type)
+    result = await session.execute(query)
+    controls = result.scalars().all()
+
+    control_data = [
+        {
+            "name": control.mark,
+            "count": control.count,
+            "start_count": control.start_count,
+            "sub": control.sub
+        }
+        for control in controls
+    ]
+
+    return control_data

@@ -20,6 +20,8 @@
     <script src="{{ url_for('static', path='js/robot-socked.js') }}"></script>
     <script src="{{ url_for('static', path='js/wire_schedule.js') }}"></script>
     <script src="{{ url_for('static', path='js/tip_schedule.js') }}"></script>
+    <script src="{{ url_for('static', path='js/gaz_schedule.js') }}"></script>
+    <script src="{{ url_for('static', path='js/defect_schedule.js') }}"></script>
     <title>{{ page_title }}</title>
 </head>
 <body>
@@ -44,6 +46,8 @@
             <div id="container"></div>
             <div id="wire-schedule"></div>
             <div id="tip-schedule"></div>
+            <div id="gas-schedule"></div>
+            <div id="defect-schedule"></div>
         </div>
         <div class="button-row">
             <button id="standard-btn" class="event-button" onclick="scrollToEvents('standard-events')">

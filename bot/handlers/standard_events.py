@@ -12,9 +12,11 @@ from bot.crud.crud_robot import (
     update_gaz,
     update_cryo,
     update_robot_component, get_all_diameter, get_all_wire_diameter, get_wire_name, get_gaz_name, get_tip_name,
-    get_rolls_name, get_intestine_name, get_diffuser_name, get_mudguard_name, get_nozzle_name
+    get_rolls_name, get_intestine_name, get_diffuser_name, get_mudguard_name, get_nozzle_name, decrement_item_quantity,
+    get_item_by_id
 )
 from bot.crud.crud_user import get_user_by_id
+from bot.handlers.get_cell_for_work import process_standard_events
 from bot.models.base import AsyncSessionLocal, Base
 from bot.models.defect_model import EventType
 from bot.models.models import Wire, Gaz, Tip, Rolls, UserWAAMer, Intestine, Diffuser, Mudguard, Nozzle, MOSCOW_TZ
@@ -78,6 +80,27 @@ async def handle_item_selection(
     await callback.answer()
 
 
+async def get_item_name(model_cost: Type[Base], item_id: int) -> str:
+    if model_cost == Rolls:
+        return await get_rolls_name(item_id)
+    elif model_cost == Intestine:
+        return await get_intestine_name(item_id)
+    elif model_cost == Wire:
+        return await get_wire_name(item_id)
+    elif model_cost == Tip:
+        return await get_tip_name(item_id)
+    elif model_cost == Intestine:
+        return await get_intestine_name(item_id)
+    elif model_cost == Diffuser:
+        return await get_diffuser_name(item_id)
+    elif model_cost == Mudguard:
+        return await get_mudguard_name(item_id)
+    elif model_cost == Nozzle:
+        return await get_nozzle_name(item_id)
+    else:
+        raise ValueError(f"Unsupported model_cost: {model_cost}")
+
+
 async def process_item_message(
         model_cost: Base,
         message: Message,
@@ -95,21 +118,27 @@ async def process_item_message(
     user_id = data['user_id']
     user = await get_user_by_id(user_id)
 
-    item_name = None
-    if model_cost == Wire:
-        item_name = await get_wire_name(item_id)
-    elif model_cost == Tip:
-        item_name = await get_tip_name(item_id)
-    elif model_cost == Rolls:
-        item_name = await get_rolls_name(item_id)
-    elif model_cost == Intestine:
-        item_name = await get_intestine_name(item_id)
-    elif model_cost == Diffuser:
-        item_name = await get_diffuser_name(item_id)
-    elif model_cost == Mudguard:
-        item_name = await get_mudguard_name(item_id)
-    elif model_cost == Nozzle:
-        item_name = await get_nozzle_name(item_id)
+    if model_cost in [Wire, Tip]:  # Custom logic for Wire and Tip
+        item_mark_attr = 'wire_mark' if model_cost == Wire else 'tip_type'
+        item_sub_attr = 'wire_diameter' if model_cost == Wire else 'tip_diameter'
+
+        item_u = await get_item_by_id(model_cost, item_id)
+        item_mark = getattr(item_u, item_mark_attr, None)
+        item_sub = getattr(item_u, item_sub_attr, None)
+
+        if item_mark is None or item_sub is None:
+            raise AttributeError(f"Attributes {item_mark_attr} or {item_sub_attr} not found in {model_cost}")
+
+        item_end_value = await decrement_item_quantity(mark=item_mark, sub=item_sub)
+        if item_end_value == 'Кончилось':
+            await message.answer('Кончилась')
+            await process_standard_events(message)
+            return
+
+        item_name = await get_item_name(model_cost, item_id)
+
+    else:  # Generic logic for other components
+        item_name = await get_item_name(model_cost, item_id)
 
     async with AsyncSessionLocal() as session:
         if extra_fields:
@@ -177,7 +206,7 @@ async def process_wire_message(message: Message, state: FSMContext) -> None:
         item_key='wire_id',
         component_field='robot_wire_id',
         update_time_field='robot_last_update_wire',
-        extra_fields={'robot_last_update_wire': moscow_now(MOSCOW_TZ)}
+        extra_fields={'robot_last_update_wire': moscow_now(MOSCOW_TZ)},
     )
 
 
@@ -296,11 +325,20 @@ async def process_gas_message(message: Message, state: FSMContext, gas_type: str
     data = await state.get_data()
     gas_id = data['gas_id']
     user_id = data['user_id']
-    item_name = await get_gaz_name(gas_id)
+    item_mark_attr = 'gaz_name'
+    item_sub_attr = 'gaz_type_obj'
+    item_u = await get_item_by_id(Gaz, gas_id)
+    item_mark = getattr(item_u, item_mark_attr, None)
+    item_sub = getattr(item_u, item_sub_attr, None)
+    item_end_value = await decrement_item_quantity(mark=item_mark, sub=item_sub)
+    if item_end_value == 'Кончилось':
+        await message.answer('Кончилась')
+        await process_standard_events(message)
+        return
     async with AsyncSessionLocal() as session:
         user = await get_user_by_id(user_id)
         await update_gaz(user, gas_id, gas_type)
-        additional_data = {"message": f"Замена {gas_type.lower()} газа на {item_name}", "user_message": user_message}
+        additional_data = {"message": f"Замена {gas_type.lower()} газа на {item_u.gaz_name}", "user_message": user_message}
         await create_event(session, user.id, EventType.SETTING, additional_data, robot_id=user.number_robot)
         await message.answer(f"{gas_type} газ обновлен и событие записано.")
     await state.clear()
@@ -341,7 +379,7 @@ async def process_cryo_box_message(message: Message, state: FSMContext) -> None:
     async with AsyncSessionLocal() as session:
         user = await get_user_by_id(user_id)
         await update_cryo(user, gas_id)
-        additional_data = {"message": f"Замена креобака на газ ID {item_name}", "user_message": user_message}
+        additional_data = {"message": f"Замена креобака на газ {item_name}", "user_message": user_message}
         await create_event(session, user.id, EventType.SETTING, additional_data, robot_id=user.number_robot)
         await message.answer(f"Креобак обновлен и событие записано.")
     await state.clear()

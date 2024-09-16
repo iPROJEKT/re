@@ -30,3 +30,13 @@ class CleaningState(StatesGroup):
 
 class ErrorState(StatesGroup):
     waiting_for_error_message = State()
+
+
+class ShiftSupervisor(StatesGroup):
+    shift_supervisor = State()
+
+
+class ConsumableStates(StatesGroup):
+    choose_type = State()
+    choose_brand = State()
+    update_quantity = State()

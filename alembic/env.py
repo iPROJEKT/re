@@ -10,10 +10,11 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from bot.models.base import Base
 from bot.models.models import (
-    UserWAAMer, Gaz, Wire, Rolls, Robot, Change, Tip, Intestine, Nozzle, Diffuser, Mudguard
+    UserWAAMer, Gaz, Wire, Rolls, Robot, Change, Tip, Intestine, Nozzle, Diffuser, Mudguard, Control
 )
 from bot.models.defect_model import Cleaning, Setting, Defect, MechanicalFault, ProgramError, ModeDeviation, GasProtectionViolation, Event
 from bot.models.admin import User
+from bot.models.models import Table
 
 # Load environment variables
 load_dotenv('.env')

@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from bot.crud.crud_for_web_socked import get_robot_web_socket
+from bot.crud.crud_user import get_last_rb
 
 router = APIRouter()
 
@@ -29,9 +30,11 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             robots = await get_robot_web_socket([1, 2])
             now = datetime.now().strftime("%H:%M:%S")
+            man = await get_last_rb()
             message = {
+                'man': man,
                 "time": now,
-                "robots": robots
+                "robots": robots,
             }
 
             # Отправляем данные в формате JSON

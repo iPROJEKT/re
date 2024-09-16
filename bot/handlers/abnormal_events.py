@@ -35,7 +35,7 @@ async def process_event(callback: CallbackQuery, state: FSMContext, event_type: 
             'mechanical_fault': 'Механическая неисправность',
             'program_error': 'Ошибка программы',
             'mode_deviation': 'Отклонение от режима',
-            'gas_protection': 'Проблема газовой защиты'
+            'gas_protection': 'Нарушение газовой защиты'
         }.get(event_type, 'Событие')
 
         # Detailed message including the event ID and user message
